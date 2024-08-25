@@ -23,9 +23,10 @@ button {
   padding: 10px;
   border-radius: 5px;
   background-color: #000000b9;
+  border: 3px solid #fff;
   color: rgb(255, 255, 255);
-  border: none;
   cursor: pointer;
+  margin-bottom: 2rem;
 }
 
 button.selected {

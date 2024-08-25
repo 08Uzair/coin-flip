@@ -9,12 +9,11 @@ const COIN_SIDES = ["Heads", "Tails"];
 const Home = () => {
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState("");
-  const [selectedSide, setSelectedSide] = useState(null);
+  const [selectedSide, setSelectedSide] = useState("");
   const [betAmount, setBetAmount] = useState("");
   const [balance, setBalance] = useState("0.00");
   const [coinResult, setCoinResult] = useState("");
   const [flipping, setFlipping] = useState(false);
-
   const connectWallet = async () => {
     try {
       if (window.ethereum) {
@@ -23,6 +22,7 @@ const Home = () => {
           method: "eth_requestAccounts",
         });
         setAccount(accounts[0]);
+        toast.success("Connected Sucessfully");
 
         const newSigner = await provider.getSigner();
         setSigner(newSigner);
@@ -30,7 +30,7 @@ const Home = () => {
         const realBalance = await newSigner.getBalance();
         setBalance(ethers.formatEther(realBalance));
       } else {
-        alert("MetaMask is not installed");
+        toast.error("MetaMask is not installed");
       }
     } catch (error) {
       console.error("Error connecting to wallet", error);
@@ -39,10 +39,6 @@ const Home = () => {
 
   const handleBetAmount = (e) => {
     setBetAmount(e.target.value);
-  };
-
-  const selectSide = (side) => {
-    setSelectedSide(side);
   };
 
   const flipCoin = async () => {
@@ -69,8 +65,11 @@ const Home = () => {
 
       await tx.wait();
 
+    
       if (result === selectedSide) {
-        toast.success(`You won! The coin landed on ${result}. You've doubled your bet.`);
+        toast.success(
+          `You won! The coin landed on ${result}. You've doubled your bet.`
+        );
         const doubleBet = ethers.parseEther((betAmount * 2).toString());
         await signer.sendTransaction({
           to: account,
@@ -87,9 +86,9 @@ const Home = () => {
       console.error("Error during coin flip:", error);
       toast.error("Transaction failed!");
       setFlipping(false);
+      setCoinResult("");
     }
   };
-
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -105,7 +104,8 @@ const Home = () => {
         <div className="item">
           <p>
             Connected Account:
-            <br /> {account}
+            <br />
+            <div className="txt3"> {account}</div>
           </p>
         </div>
         <div className="item">
@@ -113,26 +113,22 @@ const Home = () => {
             {!account ? <>Connect Account</> : <>Connected</>}
           </button>
           Balance in ETH: <div className="txt1">{balance} ETH</div>
-          Enter Bet Amount in ETH:
-          <input
-            className="txt2"
-            type="number"
-            value={betAmount}
-            onChange={handleBetAmount}
-            placeholder="Enter Bet Amount"
-          />
-          <div className="txt3">
-            <p>Coin landed on: {coinResult}</p>
-          </div>
         </div>
         <div className="item">
           <div className={`coin ${flipping ? "flipping" : ""}`}>
-            <div className="side heads">
-              <img src={head} alt="Heads" />
-            </div>
-            <div className="side tails">
-              <img src={tail} alt="Tails" />
-            </div>
+            {coinResult == "" ? (
+              <div className="side heads">
+                <img src={head} alt="Heads" />
+              </div>
+            ) : coinResult == "Heads" ? (
+              <div className="side heads">
+                <img src={head} alt="Heads" />
+              </div>
+            ) : (
+              <div className="side tails">
+                <img src={tail} alt="Tails" />
+              </div>
+            )}
           </div>
         </div>
         <div className="item">
@@ -141,7 +137,7 @@ const Home = () => {
             {COIN_SIDES.map((side) => (
               <button
                 key={side}
-                onClick={() => selectSide(side)}
+                onClick={() => setSelectedSide(side)}
                 className={selectedSide === side ? "selected" : ""}
               >
                 {side}
@@ -153,6 +149,29 @@ const Home = () => {
           <button className="txt1" onClick={flipCoin}>
             Flip Coin
           </button>
+        </div>
+        <div className="item">
+          <h2>GUIDE</h2>
+          <div className="txt5">
+            🔗 Connect your wallet <br />
+            🪙 Pick Heads or Tails <br />
+            💰 Enter your bet <br />
+            🎯 Flip & carry out the transaction
+          </div>
+        </div>
+        <div className="item">
+          Bet Amount in ETH:
+          <input
+            className="txt2"
+            type="number"
+            value={betAmount}
+            onChange={handleBetAmount}
+          />
+        </div>
+        <div className="item">
+          <div className="txt3">
+            <p>Coin landed on: {coinResult}</p>
+          </div>
         </div>
       </div>
     </>

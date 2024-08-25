@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const COIN_SIDES = ['Heads', 'Tails'];
+const COIN_SIDES = ["Heads", "Tails"];
 
 const Main = () => {
   const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState('');
+  const [account, setAccount] = useState("");
   const [selectedSide, setSelectedSide] = useState(null);
-  const [betAmount, setBetAmount] = useState('');
-  const [balance, setBalance] = useState('0.00');
-  const [coinResult, setCoinResult] = useState('');
+  const [betAmount, setBetAmount] = useState("");
+  const [balance, setBalance] = useState("0.00");
+  const [coinResult, setCoinResult] = useState("");
   const [flipping, setFlipping] = useState(false);
-  console.log(selectedSide)
-  console.log(coinResult)
+  console.log(selectedSide);
+  console.log(coinResult);
 
   const connectWallet = async () => {
     try {
       if (window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
         setAccount(accounts[0]);
 
         const newSigner = await provider.getSigner();
@@ -53,7 +55,7 @@ const Main = () => {
     setFlipping(true);
 
     const randomIndex = Math.floor(Math.random() * 2);
-    console.log(randomIndex)
+    console.log(randomIndex);
     const result = COIN_SIDES[randomIndex];
     setCoinResult(result);
 
@@ -64,26 +66,27 @@ const Main = () => {
         to: account,
         value: betValue,
         gasLimit: 21000,
-        gasPrice: ethers.parseUnits('20', 'gwei')
+        gasPrice: ethers.parseUnits("20", "gwei"),
       });
 
       await tx.wait();
 
       if (result === selectedSide) {
-        toast.success(`You won! The coin landed on ${result}. You've doubled your bet.`);
+        toast.success(
+          `You won! The coin landed on ${result}. You've doubled your bet.`
+        );
         const doubleBet = ethers.parseEther((betAmount * 2).toString());
         await signer.sendTransaction({
           to: account,
           value: doubleBet,
           gasLimit: 21000,
-          gasPrice: ethers.parseUnits('20', 'gwei')
+          gasPrice: ethers.parseUnits("20", "gwei"),
         });
       } else {
         toast.error(`You lost! The coin landed on ${result}.`);
       }
-      
-      setFlipping(false);
 
+      setFlipping(false);
     } catch (error) {
       setFlipping(false);
     }
@@ -91,7 +94,7 @@ const Main = () => {
 
   useEffect(() => {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (accounts) => {
+      window.ethereum.on("accountsChanged", (accounts) => {
         setAccount(accounts[0]);
       });
     }
@@ -102,9 +105,7 @@ const Main = () => {
       <header className="Main-header">
         <h1>Coin Flip Game</h1>
 
-        {!account && (
-          <button onClick={connectWallet}>Connect Wallet</button>
-        )}
+        {!account && <button onClick={connectWallet}>Connect Wallet</button>}
 
         {account && (
           <>
@@ -117,7 +118,7 @@ const Main = () => {
                 <button
                   key={side}
                   onClick={() => selectSide(side)}
-                  className={selectedSide === side ? 'selected' : ''}
+                  className={selectedSide === side ? "selected" : ""}
                 >
                   {side}
                 </button>
@@ -133,15 +134,15 @@ const Main = () => {
                 placeholder="Enter Bet Amount"
               />
             </div>
-
+              
             <button onClick={flipCoin}>Flip Coin</button>
 
-            <div className={`coin ${flipping ? 'flipping' : ''}`}>
+            <div className={`coin ${flipping ? "flipping" : ""}`}>
               <div className="side heads">Heads</div>
               <div className="side tails">Tails</div>
             </div>
 
-            {coinResult && <p>Coin landed on: {coinResult}</p>}
+            {coinResult && <p className="txt5">Coin landed on: {coinResult}</p>}
           </>
         )}
       </header>
